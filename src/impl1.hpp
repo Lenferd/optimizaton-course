@@ -1,7 +1,7 @@
 // Get vector elements multiplication
 
 #pragma once
-#define LENGTH 1000000
+#include "utils.hpp"
 
 namespace impl_1 {
     struct my_vector {

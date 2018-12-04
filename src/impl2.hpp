@@ -1,7 +1,7 @@
 // Get vector elements multiplication
 
 #pragma once
-#define LENGTH 1000000
+#include "utils.hpp"
 
 namespace impl_2 {
     struct my_vector {
@@ -13,13 +13,13 @@ namespace impl_2 {
         return v->len;
     }
 
-    void foo_bar(my_vector *v, double *res)
+    void foo_bar(my_vector *v, double &res)
     {
         double *vect = v->data;
         long vect_size = my_vector_len(v);
-        *res = 1;
+        res = 1;
         for (long i = 0; i < vect_size; i++) {
-            *res *= vect[i];
+            res = res * vect[i];
         }
     }
 }
