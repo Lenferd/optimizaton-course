@@ -1,72 +1,119 @@
-#include <benchmark/benchmark.h>
 #include "utils.hpp"
-#include <chrono>
 
 #include "impl1.hpp"
 #include "impl2.hpp"
 #include "impl3.hpp"
+#include "impl4.hpp"
+#include <iostream>
+#include <unistd.h>
 
-// #ifdef TEST_TIMERS
-#define TIME_START              auto start = std::chrono::high_resolution_clock::now();
-#define TIME_STOP               auto end   = std::chrono::high_resolution_clock::now();
-#define TIME_CACL               auto elapsed_seconds =  \
-                                std::chrono::duration_cast<std::chrono::duration<double>>(  \
-                                                                            end - start);
+#define ITER 10
+void BENCH(void (*f)(int, long*), const char* test_name,  const int size) {
+    long* time_result = new long[size];
+    for (size_t i = 0; i < ITER; i++) {
+        usleep(1000);
+        f(size, &time_result[i]);
+    }
+    long final_time = 0;
+    for (int i = 0; i < ITER; i++) {
+        final_time += time_result[i];
+    }
+    final_time = final_time / ITER;
+    long final_time_ms = (long)(final_time / 1e+6);
+    printf("[BENCH] %s %ld ms (%ld ns)\t Tested on %d iterations\n",
+                    test_name, final_time_ms, final_time, ITER);
+    delete[] time_result;
+}
 
-#define TIME_PASS               state.SetIterationTime(elapsed_seconds.count());
-
-#define TIME_FINISH_PASS        TIME_STOP \
-                                TIME_CACL \
-                                TIME_PASS
-
-// #endif
-
-static void IMPL1_Calculation(benchmark::State& state) {
+void impl1(const int size, long *time_result) {
     using namespace impl_1;
-    for (auto _ : state) {
-        double a[LENGTH];
-        my_vector v = {LENGTH, a};
-        double res;
-        simple_generator(a, LENGTH);
+    double* a = new double[size];
+    my_vector v;
+    v.len = size;
+    v.data = a;
 
-        TIME_START
-        foo_bar(&v, &res);
-        TIME_FINISH_PASS
-    }
+    double res;
+    genpi(a, size);
+    double expected_result = calc_reference(a, size);
+    TIME_START
+    foo_bar(&v, &res);
+    TIME_STOP
+    TIME_CACL
+    *time_result = _time_result_nanoseconds;
+
+    compare_results(expected_result, res);
+    delete[] a;
 }
-BENCHMARK(IMPL1_Calculation)->UseManualTime();
 
-static void IMPL2_Calculation(benchmark::State& state) {
+void impl2(const int size, long *time_result) {
     using namespace impl_2;
+    double* a = new double[size];
+    my_vector v;
+    v.len = size;
+    v.data = a;
 
-    for (auto _ : state) {
-        double a[LENGTH];
-        my_vector v = {LENGTH, a};
-        double res;
-        simple_generator(a, LENGTH);
+    double res;
 
-        TIME_START
-        foo_bar(&v, &res);
-        TIME_FINISH_PASS
-    }
+    genpi(a, size);
+    double expected_result = calc_reference(a, size);
+    TIME_START
+    foo_bar(&v, res);
+    TIME_STOP
+    TIME_CACL
+    *time_result = _time_result_nanoseconds;
+
+    compare_results(expected_result, res);
+    delete[] a;
 }
-BENCHMARK(IMPL2_Calculation)->UseManualTime();
 
-static void IMPL3_Calculation(benchmark::State& state) {
+void impl3(const int size, long *time_result) {
     using namespace impl_3;
+    double* a = new double[size];
+    my_vector v;
+    v.len = size;
+    v.data = a;
 
-    for (auto _ : state) {
-        double a[LENGTH];
-        my_vector v = {LENGTH, a};
-        double res;
-        simple_generator(a, LENGTH);
+    double res;
 
-        TIME_START
-        foo_bar(&v, res);
-        TIME_FINISH_PASS
-    }
+    genpi(a, size);
+    double expected_result = calc_reference(a, size);
+    TIME_START
+    foo_bar(&v, res);
+    TIME_STOP
+    TIME_CACL
+    *time_result = _time_result_nanoseconds;
+
+    compare_results(expected_result, res);
+    delete[] a;
 }
-BENCHMARK(IMPL3_Calculation)->UseManualTime();
 
 
-BENCHMARK_MAIN();
+void impl4(const int size, long *time_result) {
+    using namespace impl_3;
+    double* a = new double[size];
+    my_vector v;
+    v.len = size;
+    v.data = a;
+
+    double res;
+
+    genpi(a, size);
+    double expected_result = calc_reference(a, size);
+    TIME_START
+    foo_bar(&v, res);
+    TIME_STOP
+    TIME_CACL
+    *time_result = _time_result_nanoseconds;
+
+    compare_results(expected_result, res);
+    delete[] a;
+}
+
+int main() {
+    const int size = 6666666;
+    srand(time(NULL));
+    BENCH(impl1, "Implementation1", size);
+    BENCH(impl2, "Implementation2", size);
+    BENCH(impl3, "Implementation3", size);
+    BENCH(impl3, "Implementation4", size);
+}
