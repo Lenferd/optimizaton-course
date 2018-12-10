@@ -89,7 +89,7 @@ void impl3(const int size, long *time_result) {
 
 
 void impl4(const int size, long *time_result) {
-    using namespace impl_3;
+    using namespace impl_4;
     double* a = new double[size];
     my_vector v;
     v.len = size;
@@ -115,5 +115,5 @@ int main() {
     BENCH(impl1, "Implementation1", size);
     BENCH(impl2, "Implementation2", size);
     BENCH(impl3, "Implementation3", size);
-    BENCH(impl3, "Implementation4", size);
+    BENCH(impl4, "Implementation4", size);
 }
